@@ -29,7 +29,6 @@ docker run \
   -v $(pwd)/../dataset/aist_entrance_hall_1/video.mp4:/aist/video.mp4 \
   -v $(pwd)/../dataset/aist/equirectangular.yaml:/aist/config.yaml \
   vslam_pano
-Run VSLAM in container
 ```
 ./run_video_slam -v /data/orb_vocab.fbow -c "/data/${PATH_TO_CONFIG:?}" -m "/data/${PATH_TO_VIDEO:?}" --mask "/data/${PATH_TO_MASK:?}" --project-folder "${PATH_TO_OUTPUT_FOLDER}"
 ```
