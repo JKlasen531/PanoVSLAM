@@ -1,44 +1,35 @@
+#PanoVSLAM
 Modified OpenVSLAM to create an interactive panorama model.
 
-*********************************************************
-Dependencies:
-Same as regular OpenVSLAM
+## Dependencies
+- Docker [(installation guide)](https://docs.docker.com/engine/install/)
 
-*********************************************************
-Build instructions:
-
--cd /path/to/OnlineOpenVslamPano
-    mkdir build && cd build
-    cmake \
-        -DUSE_PANGOLIN_VIEWER=OFF \
-        -DUSE_SOCKET_PUBLISHER=ON \
-        -DUSE_STACK_TRACE_LOGGER=ON \
-        -DBUILD_TESTS=ON \
-        -DBUILD_EXAMPLES=ON \
-        ..
-    make -j4
+## Installation
+```
+git clone --recursive https://github.com/JKlasen531/PanoVSLAM.git
+cd PanoVSLAM
+docker build -t panovslam -f Dockerfile.socket . --build-arg NUM_THREADS=$(nproc)
+```
     
-*********************************************************
-Installation for PanoViewer:
-
-$ cd /path/to/PanoViewer
-$ npm install
-
-Then launch the server with:
-$ cd /path/to/PanoViewer
-$ node app.js
-WebSocket: listening on *:3000
-HTTP server: listening on *:3002
-
-After launching, please access to ``http://localhost:3002/`` to check whether the server is correctly launched.
-
-*********************************************************
-
-Example invocation:
-
-In main dir: ./build/run_video_slam -v ./orb_vocab/orb_vocab.fbow -m path/to/sciebo/Daten/2021-09-20_25-Integrationssprint/7-Donnerstag-FPV/VID_20180101_012305_00_004.mp4 -c ./example/panoviewer/config-large.yaml --mask path/to/sciebo/Daten/2021-09-20_25-Integrationssprint/7-Donnerstag-FPV/mask.png --frame-skip 1 -p ./build/tube.msg --img-output /imageoutputpath
-
-*adjust paths accordingly
-
-*********************************************************
-generally you should first launch the panoviewer, connect to ``http://localhost:3002/`` and then run video slam or camera slam
+## Running
+Start VSLAM container
+```
+docker run -it --rm --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 -p 3002:3002 --name=panovslam -v ${HOST_DATA_PATH:?Set path to directory on the host system to keep input and output data.}:/data panovslam
+```
+should volume mount orb vocab, vide file, config file and optionally a mask file
+e.g.
+docker run \
+  -it --rm --ipc=host \
+  --ulimit memlock=-1 \
+  --ulimit stack=67108864 \
+  -p 3002:3002 \
+  --name=vslam_pano \
+  -v $(pwd)/../dataset/orb_vocab.fbow:/orb_vocab.fbow \
+  -v $(pwd)/../dataset/aist/mask.png:/aist/mask.png \
+  -v $(pwd)/../dataset/aist_entrance_hall_1/video.mp4:/aist/video.mp4 \
+  -v $(pwd)/../dataset/aist/equirectangular.yaml:/aist/config.yaml \
+  vslam_pano
+Run VSLAM in container
+```
+./run_video_slam -v /data/orb_vocab.fbow -c "/data/${PATH_TO_CONFIG:?}" -m "/data/${PATH_TO_VIDEO:?}" --mask "/data/${PATH_TO_MASK:?}" --project-folder "${PATH_TO_OUTPUT_FOLDER}"
+```
