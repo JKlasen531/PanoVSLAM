@@ -197,13 +197,14 @@ RUN set -x && \
   rm -rf *
   
 #Panoviewer
-COPY PanoViewerDocker /PanoViewer/
-WORKDIR /PanoViewer/
+WORKDIR /
 RUN set -x && \
   apt-get update -y -qq && \
   apt-get upgrade -y -qq --no-install-recommends && \
   curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
   apt-get install -y nodejs && \
+  git clone https://github.com/JKlasen531/Panoviewer.git && \
+  cd Panoviewer && \
   npm install && \
   rm -rf /var/lib/apt/lists/*
 
